@@ -1,0 +1,51 @@
+openapi: 3.0.3
+
+info:
+  title: "XTZ delegation API"
+  description: "API to retrieve XTZ's delegations"
+  version: 1.0.0
+
+components:
+  schemas:
+    Delegation:
+      type: object
+      required:
+        - amount
+        - block
+        - delegator
+        - timestamp
+      properties:
+        amount:
+           type: integer
+        block:
+          type: string
+        delegator:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    DelegationsResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Delegation"
+
+paths:
+  "/xtz/delegations":
+    get:
+      description: "Get all delegations"
+      summary: "Get all delegations"
+      responses:
+        200:
+          description: "All delegations returned"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/DelegationsResponse"
+      tags:
+      - Delegation
