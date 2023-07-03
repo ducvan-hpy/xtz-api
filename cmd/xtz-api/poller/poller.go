@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/ducvan-hpy/xtz-api/internal/domain/models"
+	"github.com/ducvan-hpy/xtz-api/internal/domain/model"
 	"github.com/ducvan-hpy/xtz-api/internal/domain/repository"
 )
 
-type DelegationsGetter func(context.Context) ([]models.Delegation, error)
+type DelegationsGetter func(context.Context) ([]model.Delegation, error)
 
 type Poller struct {
 	delegationGetter DelegationsGetter

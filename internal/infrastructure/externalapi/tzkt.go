@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	models "github.com/ducvan-hpy/xtz-api/internal/domain/models"
+	model "github.com/ducvan-hpy/xtz-api/internal/domain/model"
 )
 
 const getDelegationsPath = "/v1/operations/delegations"
@@ -35,22 +35,22 @@ func NewTzktSDK(server string) *TzktSDK {
 	}
 }
 
-func (t *TzktSDK) GetDelegations(ctx context.Context) ([]models.Delegation, error) {
+func (t *TzktSDK) GetDelegations(ctx context.Context) ([]model.Delegation, error) {
 	var delegations []Delegation
 
 	resp, err := http.Get(t.server + getDelegationsPath)
 	defer resp.Body.Close()
 	if err != nil {
 		log.Printf("fail to get delegations: %v", err)
-		return []models.Delegation{}, err
+		return []model.Delegation{}, err
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&delegations); err != nil {
 		log.Printf("fail to decode delegations: %v", err)
-		return []models.Delegation{}, err
+		return []model.Delegation{}, err
 	}
 
-	domainDelegations := make([]models.Delegation, 0, len(delegations))
+	domainDelegations := make([]model.Delegation, 0, len(delegations))
 	for _, d := range delegations {
 		domainDelegations = append(domainDelegations, d.ToDomain())
 	}
@@ -58,8 +58,8 @@ func (t *TzktSDK) GetDelegations(ctx context.Context) ([]models.Delegation, erro
 	return domainDelegations, nil
 }
 
-func (d Delegation) ToDomain() models.Delegation {
-	return models.Delegation{
+func (d Delegation) ToDomain() model.Delegation {
+	return model.Delegation{
 		Amount:    d.Amount,
 		Block:     d.Block,
 		Delegator: d.Sender.Address,

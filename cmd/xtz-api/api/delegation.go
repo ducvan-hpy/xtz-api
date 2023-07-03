@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ducvan-hpy/xtz-api/internal/domain/models"
+	"github.com/ducvan-hpy/xtz-api/internal/domain/model"
 )
 
 func (a *Api) GetXtzDelegations(c *gin.Context) {
@@ -17,7 +17,7 @@ func (a *Api) GetXtzDelegations(c *gin.Context) {
 	c.JSON(http.StatusOK, NewDelegationsResponse(domainDelegations))
 }
 
-func NewDelegationsResponse(domainDelegations []models.Delegation) DelegationsResponse {
+func NewDelegationsResponse(domainDelegations []model.Delegation) DelegationsResponse {
 	data := make([]Delegation, 0, len(domainDelegations))
 	for _, dd := range domainDelegations {
 		delegation := Delegation{
