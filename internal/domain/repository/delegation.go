@@ -8,5 +8,5 @@ import (
 
 type Delegation interface {
 	List(ctx context.Context) ([]models.Delegation, error)
-	Save(ctx context.Context, delegation models.Delegation) error
+	Save(ctx context.Context, delegations []models.Delegation) error
 }

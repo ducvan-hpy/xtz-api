@@ -16,11 +16,10 @@ func NewInMemoryStorage() *InMemoryStorage {
 }
 
 func (ims *InMemoryStorage) List(ctx context.Context) ([]models.Delegation, error) {
-	ims.Save(ctx, models.Delegation{})
 	return ims.delegations, nil
 }
 
-func (ims *InMemoryStorage) Save(ctx context.Context, delegation models.Delegation) error {
-	ims.delegations = append(ims.delegations, delegation)
+func (ims *InMemoryStorage) Save(ctx context.Context, delegation []models.Delegation) error {
+	ims.delegations = append(ims.delegations, delegation...)
 	return nil
 }

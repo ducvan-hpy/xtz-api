@@ -5,20 +5,31 @@ import (
 	"log"
 	"time"
 
+	"github.com/ducvan-hpy/xtz-api/internal/domain/models"
 	"github.com/ducvan-hpy/xtz-api/internal/domain/repository"
 )
 
+type DelegationsGetter func(context.Context) ([]models.Delegation, error)
+
 type Poller struct {
-	tzktAPI    string
-	interval   time.Duration
-	repository *repository.Repository
+	delegationGetter DelegationsGetter
+	interval         time.Duration
+	repository       *repository.Repository
 }
 
-func New(api string, interval time.Duration, repo *repository.Repository) *Poller {
+func New(delegationGetter DelegationsGetter, interval time.Duration, repo *repository.Repository) *Poller {
+	if delegationGetter == nil {
+		log.Fatal("missing delegationGetter")
+	}
+
+	if repo == nil {
+		log.Fatal("missing repository")
+	}
+
 	return &Poller{
-		tzktAPI:    api,
-		interval:   interval,
-		repository: repo,
+		delegationGetter: delegationGetter,
+		interval:         interval,
+		repository:       repo,
 	}
 }
 
@@ -31,6 +42,11 @@ func (p *Poller) Start(ctx context.Context) {
 }
 
 func (p *Poller) pollDelegations(ctx context.Context) {
-	log.Println("Polling TzKT API:", p.tzktAPI)
-	// GetDelegations
+	log.Println("Polling TzKT API")
+	delegations, err := p.delegationGetter(ctx)
+	if err != nil {
+		log.Panic(err)
+	}
+	log.Printf("Got %d delegations", len(delegations))
+	p.repository.Delegation.Save(ctx, delegations)
 }

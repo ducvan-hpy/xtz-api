@@ -10,6 +10,7 @@ import (
 	"github.com/ducvan-hpy/xtz-api/cmd/xtz-api/api"
 	"github.com/ducvan-hpy/xtz-api/cmd/xtz-api/poller"
 	"github.com/ducvan-hpy/xtz-api/internal/domain/repository"
+	"github.com/ducvan-hpy/xtz-api/internal/infrastructure/externalapi"
 	"github.com/ducvan-hpy/xtz-api/internal/infrastructure/persistence"
 )
 
@@ -28,7 +29,8 @@ func main() {
 	engine := api.NewGinRouter(restAPI)
 
 	// Run poller in goroutine.
-	delegationPoller := poller.New("tzktSDK", pollInterval, repo)
+	tzktSDK := externalapi.NewTzktSDK("https://api.tzkt.io")
+	delegationPoller := poller.New(tzktSDK.GetDelegations, pollInterval, repo)
 	go delegationPoller.Start(context.Background())
 
 	serverURL := fmt.Sprintf("%s:%d", host, port)
