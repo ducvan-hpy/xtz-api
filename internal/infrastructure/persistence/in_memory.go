@@ -19,7 +19,7 @@ func (ims *InMemoryStorage) List(ctx context.Context) ([]model.Delegation, error
 	return ims.delegations, nil
 }
 
-func (ims *InMemoryStorage) Save(ctx context.Context, delegation []model.Delegation) error {
-	ims.delegations = append(ims.delegations, delegation...)
-	return nil
+func (ims *InMemoryStorage) Save(ctx context.Context, delegations []model.Delegation) int {
+	ims.delegations = append(ims.delegations, delegations...)
+	return ims.delegations[len(ims.delegations)-1].ID
 }

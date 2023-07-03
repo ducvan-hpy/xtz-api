@@ -15,9 +15,13 @@ import (
 )
 
 const (
-	host         = "localhost"
-	port         = 8090
-	pollInterval = 10 * time.Second
+	host = "localhost"
+	port = 8090
+
+	getLimit = 10000 // Limit of delegations returned.
+
+	pollInterval     = 3 * time.Second // Interval if last call returned new delegations.
+	pollIntervalIdle = 1 * time.Minute // Interval if last call did not return new delegation.
 )
 
 func main() {
@@ -30,7 +34,7 @@ func main() {
 
 	// Run poller in goroutine.
 	tzktSDK := externalapi.NewTzktSDK("https://api.tzkt.io")
-	delegationPoller := poller.New(tzktSDK.GetDelegations, pollInterval, repo)
+	delegationPoller := poller.New(tzktSDK, getLimit, pollInterval, pollIntervalIdle, repo)
 	go delegationPoller.Start(context.Background())
 
 	serverURL := fmt.Sprintf("%s:%d", host, port)

@@ -5,21 +5,23 @@ import (
 	"log"
 	"time"
 
-	"github.com/ducvan-hpy/xtz-api/internal/domain/model"
+	"github.com/ducvan-hpy/xtz-api/internal/application/services/tzkt"
 	"github.com/ducvan-hpy/xtz-api/internal/domain/repository"
 )
 
-type DelegationsGetter func(context.Context) ([]model.Delegation, error)
-
 type Poller struct {
-	delegationGetter DelegationsGetter
-	interval         time.Duration
-	repository       *repository.Repository
+	client          tzkt.TzktSDK
+	limit           int
+	interval        time.Duration
+	intervalIdle    time.Duration
+	intervalCurrent time.Duration
+	repository      *repository.Repository
+	lastID          int // Used for pagination
 }
 
-func New(delegationGetter DelegationsGetter, interval time.Duration, repo *repository.Repository) *Poller {
-	if delegationGetter == nil {
-		log.Fatal("missing delegationGetter")
+func New(client tzkt.TzktSDK, limit int, interval, intervalIdle time.Duration, repo *repository.Repository) *Poller {
+	if client == nil {
+		log.Fatal("missing TzKT delegations client")
 	}
 
 	if repo == nil {
@@ -27,9 +29,13 @@ func New(delegationGetter DelegationsGetter, interval time.Duration, repo *repos
 	}
 
 	return &Poller{
-		delegationGetter: delegationGetter,
-		interval:         interval,
-		repository:       repo,
+		client:          client,
+		limit:           limit,
+		interval:        interval,
+		intervalIdle:    intervalIdle,
+		intervalCurrent: interval,
+		repository:      repo,
+		lastID:          396673983447040,
 	}
 }
 
@@ -37,16 +43,29 @@ func (p *Poller) Start(ctx context.Context) {
 	log.Printf("Setup TzKT API Poller with interval: %v", p.interval)
 	ticker := time.NewTicker(p.interval)
 	for range ticker.C {
-		p.pollDelegations(ctx)
+		n := p.pollDelegations(ctx)
+		if n == 0 {
+			if p.intervalCurrent == p.interval {
+				ticker.Reset(p.intervalIdle)
+				p.intervalCurrent = p.intervalIdle
+			}
+		} else {
+			if p.intervalCurrent == p.intervalIdle {
+				ticker.Reset(p.interval)
+				p.intervalCurrent = p.interval
+			}
+		}
+		log.Printf("Got %d delegations, next poll in %v", n, p.intervalCurrent)
 	}
 }
 
-func (p *Poller) pollDelegations(ctx context.Context) {
+func (p *Poller) pollDelegations(ctx context.Context) int {
 	log.Println("Polling TzKT API")
-	delegations, err := p.delegationGetter(ctx)
+	delegations, err := p.client.GetDelegations(ctx, p.limit, p.lastID)
 	if err != nil {
-		log.Panic(err)
+		log.Println(err)
+		return 0
 	}
-	log.Printf("Got %d delegations", len(delegations))
-	p.repository.Delegation.Save(ctx, delegations)
+	p.lastID = p.repository.Delegation.Save(ctx, delegations)
+	return len(delegations)
 }
