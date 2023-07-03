@@ -37,7 +37,7 @@ func NewTzktSDK(server string) *TzktSDK {
 	}
 }
 
-func (t *TzktSDK) GetDelegations(ctx context.Context, limit, lastID int) ([]model.Delegation, error) {
+func (t *TzktSDK) GetDelegations(ctx context.Context, limit, lastID int) (model.DelegationsByYearToSave, error) {
 	params := url.Values{}
 	params.Add("limit", strconv.Itoa(limit))
 	params.Add("offset.cr", strconv.Itoa(lastID))
@@ -49,21 +49,28 @@ func (t *TzktSDK) GetDelegations(ctx context.Context, limit, lastID int) ([]mode
 	defer resp.Body.Close()
 	if err != nil {
 		log.Printf("fail to get delegations: %v", err)
-		return []model.Delegation{}, err
+		return model.DelegationsByYearToSave{}, err
 	}
 
 	var delegations []Delegation
 	if err := json.NewDecoder(resp.Body).Decode(&delegations); err != nil {
 		log.Printf("fail to decode delegations: %v", err)
-		return []model.Delegation{}, err
+		return model.DelegationsByYearToSave{}, err
 	}
 
-	domainDelegations := make([]model.Delegation, 0, len(delegations))
-	for _, d := range delegations {
-		domainDelegations = append(domainDelegations, d.ToDomain())
+	delegationsByYearToSave := model.DelegationsByYearToSave{}
+	for i := range delegations {
+		d := delegations[i]
+		year := d.Timestamp.Year()
+
+		_, ok := delegationsByYearToSave[year]
+		if !ok {
+			delegationsByYearToSave[year] = make([]model.Delegation, 0, limit)
+		}
+		delegationsByYearToSave[year] = append(delegationsByYearToSave[year], d.ToDomain())
 	}
 
-	return domainDelegations, nil
+	return delegationsByYearToSave, nil
 }
 
 func (d Delegation) ToDomain() model.Delegation {

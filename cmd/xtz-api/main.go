@@ -20,8 +20,8 @@ const (
 
 	getLimit = 10000 // Limit of delegations returned.
 
-	pollInterval     = 3 * time.Second // Interval if last call returned new delegations.
-	pollIntervalIdle = 1 * time.Minute // Interval if last call did not return new delegation.
+	pollInterval     = 1 * time.Second // Interval if last call returned new delegations.
+	pollIntervalIdle = 2 * time.Minute // Interval if last call did not return new delegation.
 )
 
 func main() {

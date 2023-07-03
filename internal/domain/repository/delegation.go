@@ -7,6 +7,6 @@ import (
 )
 
 type Delegation interface {
-	List(ctx context.Context) ([]model.Delegation, error)
-	Save(ctx context.Context, delegations []model.Delegation) int
+	List(ctx context.Context, year *int) ([]model.Delegation, error)
+	Save(ctx context.Context, delegationsByYearToSave model.DelegationsByYearToSave) (int, int)
 }

@@ -8,8 +8,8 @@ import (
 	"github.com/ducvan-hpy/xtz-api/internal/domain/model"
 )
 
-func (a *Api) GetXtzDelegations(c *gin.Context) {
-	domainDelegations, err := a.repository.Delegation.List(c)
+func (a *Api) GetXtzDelegations(c *gin.Context, params GetXtzDelegationsParams) {
+	domainDelegations, err := a.repository.Delegation.List(c, params.Year)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return

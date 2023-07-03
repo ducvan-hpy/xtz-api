@@ -7,5 +7,5 @@ import (
 )
 
 type TzktSDK interface {
-	GetDelegations(ctx context.Context, limit, lastID int) ([]model.Delegation, error)
+	GetDelegations(ctx context.Context, limit, lastID int) (model.DelegationsByYearToSave, error)
 }

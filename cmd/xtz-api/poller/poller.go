@@ -35,7 +35,7 @@ func New(client tzkt.TzktSDK, limit int, interval, intervalIdle time.Duration, r
 		intervalIdle:    intervalIdle,
 		intervalCurrent: interval,
 		repository:      repo,
-		lastID:          396673983447040,
+		lastID:          0,
 	}
 }
 
@@ -43,8 +43,8 @@ func (p *Poller) Start(ctx context.Context) {
 	log.Printf("Setup TzKT API Poller with interval: %v", p.interval)
 	ticker := time.NewTicker(p.interval)
 	for range ticker.C {
-		n := p.pollDelegations(ctx)
-		if n == 0 {
+		added := p.pollDelegations(ctx)
+		if added == 0 {
 			if p.intervalCurrent == p.interval {
 				ticker.Reset(p.intervalIdle)
 				p.intervalCurrent = p.intervalIdle
@@ -55,17 +55,17 @@ func (p *Poller) Start(ctx context.Context) {
 				p.intervalCurrent = p.interval
 			}
 		}
-		log.Printf("Got %d delegations, next poll in %v", n, p.intervalCurrent)
+		log.Printf("Got %d delegations, next poll in %v", added, p.intervalCurrent)
 	}
 }
 
 func (p *Poller) pollDelegations(ctx context.Context) int {
-	log.Println("Polling TzKT API")
-	delegations, err := p.client.GetDelegations(ctx, p.limit, p.lastID)
+	var delegationsAdded int
+	delegationsByYearToSave, err := p.client.GetDelegations(ctx, p.limit, p.lastID)
 	if err != nil {
 		log.Println(err)
-		return 0
+		return delegationsAdded
 	}
-	p.lastID = p.repository.Delegation.Save(ctx, delegations)
-	return len(delegations)
+	p.lastID, delegationsAdded = p.repository.Delegation.Save(ctx, delegationsByYearToSave)
+	return delegationsAdded
 }

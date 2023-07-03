@@ -9,3 +9,6 @@ type Delegation struct {
 	Delegator string
 	Timestamp time.Time
 }
+
+// DelegationsByYear is used to save delegations efficiently.
+type DelegationsByYearToSave map[int][]Delegation

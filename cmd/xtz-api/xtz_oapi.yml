@@ -40,6 +40,12 @@ paths:
     get:
       description: "Get all delegations"
       summary: "Get all delegations"
+      parameters:
+      - name: year
+        in: query
+        required: false
+        schema:
+          type: integer
       responses:
         200:
           description: "All delegations returned"
