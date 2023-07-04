@@ -46,11 +46,11 @@ func (t *TzktSDK) GetDelegations(ctx context.Context, limit, lastID int) (model.
 
 	log.Printf("Calling %s", url)
 	resp, err := http.Get(url)
-	defer resp.Body.Close()
 	if err != nil {
 		log.Printf("fail to get delegations: %v", err)
 		return model.DelegationsByYearToSave{}, err
 	}
+	defer resp.Body.Close()
 
 	var delegations []Delegation
 	if err := json.NewDecoder(resp.Body).Decode(&delegations); err != nil {
