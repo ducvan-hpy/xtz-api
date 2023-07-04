@@ -4,7 +4,7 @@ TARGET_NAME = xtzapi
 DIST_DIR    = dist
 
 CODEGEN_BIN = $(GOPATH)/bin/oapi-codegen
-CODEGEN_VER = latest
+CODEGEN_VER = v1.13.0
 
 OPENAPI_FILE = xtz_oapi.yml
 CODEGEN_FILE = api/xtzapi.gen.go
