@@ -9,11 +9,7 @@ import (
 )
 
 func (a *Api) GetXtzDelegations(c *gin.Context, params GetXtzDelegationsParams) {
-	domainDelegations, err := a.repository.Delegation.List(c, params.Year)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
-		return
-	}
+	domainDelegations := a.repository.Delegation.List(c, params.Year)
 	c.JSON(http.StatusOK, NewDelegationsResponse(domainDelegations))
 }
 
