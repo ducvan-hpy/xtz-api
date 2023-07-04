@@ -16,9 +16,9 @@ func New(repo *repository.Repository) *Api {
 	}
 }
 
-func NewGinRouter(a *Api) (g *gin.Engine) {
+func NewGinRouter(a *Api) *gin.Engine {
 	r := gin.New()
 	r.Use(logRequest())
-	g = RegisterHandlers(r, a)
-	return
+	RegisterHandlers(r, a)
+	return r
 }
