@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	"github.com/ducvan-hpy/xtz-api/internal/domain/model"
@@ -22,14 +21,14 @@ func NewInMemoryStorage() *InMemoryStorage {
 	}
 }
 
-func (ims *InMemoryStorage) List(ctx context.Context, year *int) ([]model.Delegation, error) {
+func (ims *InMemoryStorage) List(ctx context.Context, year *int) []model.Delegation {
 	if year != nil {
-		log.Printf("Filter on %d", *year)
+		log.Printf("Filter on year %d", *year)
 		delegations, ok := ims.delegationsByYear[*year]
 		if !ok {
-			return []model.Delegation{}, errors.New("invalid year parameter")
+			return []model.Delegation{}
 		}
-		return delegations, nil
+		return delegations
 	}
 
 	delegations := make([]model.Delegation, 0, 100000)
@@ -40,7 +39,7 @@ func (ims *InMemoryStorage) List(ctx context.Context, year *int) ([]model.Delega
 		}
 	}
 
-	return delegations, nil
+	return delegations
 }
 
 func (ims *InMemoryStorage) Save(ctx context.Context, delegationsByYearToSave model.DelegationsByYearToSave) (int, int) {
